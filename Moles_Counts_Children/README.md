@@ -1,7 +1,7 @@
 A simple final project of 6611, to explore the moles counts on Colorado children and life style.
 #### Data is not for public. ####
 #### The workflow ####
-1. Import the .xls mole count of children from 2004 to 2008 data 
+1. Import the .xls mole count of children from 2004 to 2008 data to Rstudio.
 2. From the backgroud literature review and went through the variables, come up with the question that lm(mole count ~ waterside vacaion + oca2gene_status/ + baseskin_color)
 3. Summary the informtion of the data, tidydata.
 4. Do the linear regression diagnostic quick in sas and find the proper set of mole count ~ waterside vacation (data in longitudinal form, just choose one time point to do simple linear regression)
