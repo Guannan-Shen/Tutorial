@@ -1,6 +1,6 @@
 A simple final project of 6611, to explore the moles counts on Colorado children and life style.
-Data is not for public.
-The workflow
+## Data is not for public. ##
+#### The workflow ####
 1. Import the .xls mole count of children from 2004 to 2008 data 
 2. From the backgroud literature review and went through the variables, come up with the question that lm(mole count ~ waterside vacaion + oca2gene_status/ + baseskin_color)
 3. Summary the informtion of the data, tidydata.
