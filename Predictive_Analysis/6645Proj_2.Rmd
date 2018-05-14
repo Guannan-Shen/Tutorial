@@ -1,0 +1,220 @@
+---
+title: "6645Proj2"
+author: "Guannan_Shen"
+date: "May 11, 2018"
+output: 
+  pdf_document:
+    latex_engine: lualatex
+    number_sections: yes
+    toc: yes
+    toc_depth: 5
+  html_document:
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_depth: 5
+    toc_float: yes
+  word_document:
+    toc: yes
+    toc_depth: '5'
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=TRUE)
+knitr::opts_chunk$set(engine = "R")
+getwd()                                          ## get the path work directory
+                                                 ## cache = F, if cache = T, will not revaluate code chunk everytime
+## double or more space to insert a line break
+```
+
+
+```{r feature, echo=FALSE, warning=FALSE}
+require(tidyverse, quietly = TRUE)
+require(e1071, quietly = TRUE)
+require(caret, quietly = TRUE)
+require(corrplot)
+## Breast Cancer Diagnostic Data From UCI
+bcdd <- read.csv("BreastCancerDiagnostic.csv")
+## glimpse(bcdd)
+## summary(bcdd)
+## str(bcdd)
+levels(bcdd$diagnosis)
+paste("1st the predictors are all numeric; ", 
+      "2nd the ID and X are uselss; ",
+      "Diagnosis is the result, rename to predict the M. ")
+
+## generating working dataset
+## drop id and X, w for work
+d_w <- bcdd[ , -c(1,33)]
+## rename B in diagnosis as zb
+levels(d_w$diagnosis) <- c("ZB", "M")
+levels(d_w$diagnosis)
+dim(d_w)
+d_w <- data.frame(d_w)
+
+## class of predictors
+type.d <- apply(d_w[ , -1], 2, class) 
+sum(type.d != "numeric")
+print("all predictors are numeric")
+
+## test skewness and carry out normalization and standardization anyway
+ske.mean.sd <- function(dataframe){
+skew.d <- apply(dataframe[ , -1], 2, skewness)
+mean.d <- apply(dataframe[ , -1], 2, mean)
+sd.d <- apply(dataframe[ ,-1], 2, sd)
+min.d <- apply(dataframe[ ,-1], 2, min)
+sum.stats <- round(rbind(skew.d, mean.d, sd.d, min.d),2)
+rownames(sum.stats) <- c("skewness", "mean", "s.d.", "min")
+data.frame(sum.stats)}
+ske.mean.sd(d_w)
+print("all predictors are positive, thus use BoxCox")
+
+```
+
+```{r importance, echo=FALSE, warning=FALSE}
+require(caret, quietly = TRUE)
+require(randomForest)
+require(glmnet, quietly = TRUE)
+d_num <- d_w
+levels(d_num$diagnosis) <- c("0", "1")
+d_num$diagnosis <- as.numeric(d_num$diagnosis)
+## rank the correlation
+cor.y <- cor(d_w[ ,-1], d_num$diagnosis, method = "spearman" )
+cor.f <- data.frame(cor.y[order(cor.y, decreasing = TRUE)])
+rownames(cor.f) <-  rownames(cor.y)[order(cor.y, decreasing = TRUE)]
+cor.f
+## feature plot 
+top5 <- order(cor.y, decreasing = TRUE)[1:5] +1
+## the featurePlot only for continous features 
+featurePlot( x = d_w[ , top5],
+             y = bcdd$diagnosis,
+             plot = "ellipse",
+             ## Add a key at the top
+            auto.key = list(columns = 2)
+             )
+print("Top5 can seperate y but there is overlap.")
+## rf to show variable importance of original dataset
+set.seed(1234)
+rf.dw <- randomForest(diagnosis ~ ., data = d_w, method="class", importance=T, ntrees=500, mtry=2)
+print(rf.dw)
+varImpPlot(rf.dw, type=1, pch=19, col=1, cex=.7, main="Mean decrease accuracy")
+varImpPlot(rf.dw, type=2, pch=19, col=1, cex=.7, main="Mean decrease in Gini")
+
+## lasso shrinkage
+## preprocess for KNN
+## the function will leave categorical aside
+preKNN <- preProcess(d_w, method = c("BoxCox", "center", "scale"))
+## normalized data n
+d_nor<- predict(preKNN, d_w)
+ske.mean.sd(d_nor)
+## using normalized, centered data
+set.seed(1234)
+cv.lassodw <- cv.glmnet(data.matrix(d_nor[ , -1]),d_nor$diagnosis, type.measure = "class", family= "binomial")
+min(cv.lassodw$cvm)
+coef(cv.lassodw, s = "lambda.min")
+
+```
+```{r KNN, echo=FALSE, warning=FALSE}
+require(caret, quietly = TRUE)
+require(Metrics)
+## features selection
+## Based on previous rf model
+week.var <- c("symmetry_se", "smoothness_se", "texture_se", "fractal_dimension_mean")
+d_reduced <- d_w[ , -which(colnames(d_w) %in% week.var)]
+dim(d_reduced)
+dnor.reduced <- d_nor[ , -which(colnames(d_w) %in% week.var)]
+dim(dnor.reduced)
+
+## now we have d_nor and d_nn for KNN
+fitControl <- trainControl(## 10 fold repeated CV
+                    method = "repeatedcv",
+                    number = 10,
+                    repeats = 3,
+                    classProbs = TRUE,
+                    # sampling = "smote",
+                    summaryFunction = twoClassSummary,
+                    verboseIter = FALSE)
+## tuning grid of KNN
+knnGrid <- expand.grid(k = (1:10))
+## train the model 
+
+set.seed(1234)
+knn <- train(diagnosis ~., data = dnor.reduced, 
+                   method = "knn",
+                   #distribution = "bernoulli",
+                   #verbose = F,
+                   metric = "Accuracy",
+                   trControl = fitControl,
+                   tuneGrid = knnGrid)
+print(knn$finalModel)
+## accuracy
+preknn <- predict(knn, dnor.reduced, type = "raw")
+accuracy(d_nor$diagnosis, preknn)
+## full predictors
+set.seed(1234)
+knn.a <- train(diagnosis ~., data = d_nor, 
+                   method = "knn",
+                   #distribution = "bernoulli",
+                   #verbose = F,
+                   metric = "Accuracy",
+                   trControl = fitControl,
+                   tuneGrid = knnGrid)
+print(knn.a$finalModel)
+
+preknna <- predict(knn.a, d_nor, type = "raw")
+accuracy(d_nor$diagnosis, preknna)
+## compared with full or reduced data
+paste("The KNN model based on the reduced data is better. ",
+      "The accuracy is: ", "0.9754")
+
+```
+```{r stacking, echo=FALSE, warning=FALSE}
+require(caret, quietly = TRUE)
+require(randomForest)
+## compare random foreset and random forest + KNN stacking
+## tuning grid of rf
+rfGrid <- expand.grid(mtry = (1:5))
+
+## train rf model with caret 
+set.seed(1234)
+rf <- train(diagnosis ~., data = d_reduced, 
+                   method = "rf",
+                   #distribution = "bernoulli",
+                   #verbose = F,
+                   metric = "Accuracy",
+                   trControl = fitControl,
+                   tuneGrid = rfGrid)
+print(rf$finalModel)
+##
+
+## full predictors
+set.seed(1234)
+rfo <- train(diagnosis ~., data = d_w, 
+                   method = "rf",
+                   #distribution = "bernoulli",
+                   #verbose = F,
+                   metric = "Accuracy",
+                   trControl = fitControl,
+                   tuneGrid = rfGrid)
+print(rfo$finalModel)
+## the reduced data is better
+paste("The RandomForest model based on the reduced data is better. ",
+      "The OOB error is: ", "3.87%")
+partialPlot(rf$finalModel, d_reduced,perimeter_worst)
+
+##stacking model with the output of KNN as new feature
+d_reduced$KNNfeature <- preknn
+set.seed(1234)
+rf.f <- train(diagnosis ~., data = d_reduced, 
+                   method = "rf",
+                   #distribution = "bernoulli",
+                   #verbose = F,
+                   metric = "Accuracy",
+                   trControl = fitControl,
+                   tuneGrid = rfGrid)
+print(rf.f$finalModel)
+
+
+
+```
