@@ -29,7 +29,9 @@ getwd()                                          ## get the path work directory
 ```
 
 
-```{r feature, echo=FALSE, warning=FALSE}
+```{r feature, warning=FALSE}
+knitr::opts_chunk$set(
+  fig.path = "images/")
 require(tidyverse, quietly = TRUE)
 require(e1071, quietly = TRUE)
 require(caret, quietly = TRUE)
@@ -67,12 +69,22 @@ min.d <- apply(dataframe[ ,-1], 2, min)
 sum.stats <- round(rbind(skew.d, mean.d, sd.d, min.d),2)
 rownames(sum.stats) <- c("skewness", "mean", "s.d.", "min")
 data.frame(sum.stats)}
-ske.mean.sd(d_w)
+
+## use the summary function on original data 
+d_wsum <- ske.mean.sd(d_w)
+kable(d_wsum[, 1:6], caption = "Statistics of Original Data")
 print("all predictors are positive, thus use BoxCox")
+
+## prevalence
+prevalence.M <- mean(d_w$diagnosis == "M")
+prevalence.M
 
 ```
 
-```{r importance, echo=FALSE, warning=FALSE}
+
+```{r importance, warning=FALSE, fig.width = 8.5, fig.height = 6}
+knitr::opts_chunk$set(
+  fig.path = "images/")
 require(caret, quietly = TRUE)
 require(randomForest)
 require(glmnet, quietly = TRUE)
@@ -107,7 +119,9 @@ varImpPlot(rf.dw, type=2, pch=19, col=1, cex=.7, main="Mean decrease in Gini")
 preKNN <- preProcess(d_w, method = c("BoxCox", "center", "scale"))
 ## normalized data n
 d_nor<- predict(preKNN, d_w)
-ske.mean.sd(d_nor)
+d_norsum <- ske.mean.sd(d_nor)
+kable(d_norsum[, 1:6], caption = "Statistics of Transformed Data")
+
 ## using normalized, centered data
 set.seed(1234)
 cv.lassodw <- cv.glmnet(data.matrix(d_nor[ , -1]),d_nor$diagnosis, type.measure = "class", family= "binomial")
@@ -115,7 +129,12 @@ min(cv.lassodw$cvm)
 coef(cv.lassodw, s = "lambda.min")
 
 ```
-```{r KNN, echo=FALSE, warning=FALSE}
+
+
+
+```{r KNN, warning=FALSE}
+knitr::opts_chunk$set(
+  fig.path = "images/")
 require(caret, quietly = TRUE)
 require(Metrics)
 ## features selection
@@ -138,8 +157,9 @@ fitControl <- trainControl(## 10 fold repeated CV
 ## tuning grid of KNN
 knnGrid <- expand.grid(k = (1:10))
 ## train the model 
-
+## reduced dataset 
 set.seed(1234)
+print("This one is proved to be the better one")
 knn <- train(diagnosis ~., data = dnor.reduced, 
                    method = "knn",
                    #distribution = "bernoulli",
@@ -150,7 +170,10 @@ knn <- train(diagnosis ~., data = dnor.reduced,
 print(knn$finalModel)
 ## accuracy
 preknn <- predict(knn, dnor.reduced, type = "raw")
+confusionMatrix(preknn, dnor.reduced$diagnosis, positive = "M")
+
 accuracy(d_nor$diagnosis, preknn)
+preknnP <- predict(knn, dnor.reduced, type = "prob")
 ## full predictors
 set.seed(1234)
 knn.a <- train(diagnosis ~., data = d_nor, 
@@ -163,20 +186,75 @@ knn.a <- train(diagnosis ~., data = d_nor,
 print(knn.a$finalModel)
 
 preknna <- predict(knn.a, d_nor, type = "raw")
+confusionMatrix(preknna, dnor.reduced$diagnosis, positive = "M")
 accuracy(d_nor$diagnosis, preknna)
 ## compared with full or reduced data
 paste("The KNN model based on the reduced data is better. ",
       "The accuracy is: ", "0.9754")
+## using pcd to do demension reduction and show the KNN
+pr.dreduced <- prcomp(d_reduced[ ,-1])
+plot(pr.dreduced)
+
+
+## k = 1, k = 4, k =8
+set.seed(1234)
+knn1 <- train(diagnosis ~., data = dnor.reduced, 
+                   method = "knn",
+                   #distribution = "bernoulli",
+                   #verbose = F,
+                   metric = "Accuracy",
+                   trControl = fitControl,
+                   tuneGrid = expand.grid(k = 1))
+print(knn1$finalModel)
+## accuracy
+preknn1 <- predict(knn1, dnor.reduced, type = "raw")
+set.seed(1234)
+knn4 <- train(diagnosis ~., data = dnor.reduced, 
+                   method = "knn",
+                   #distribution = "bernoulli",
+                   #verbose = F,
+                   metric = "Accuracy",
+                   trControl = fitControl,
+                   tuneGrid = expand.grid(k = 4))
+print(knn4$finalModel)
+## accuracy
+preknn4 <- predict(knn4, dnor.reduced, type = "raw")
+## for plot
+knnplot <- data.frame(pr.dreduced$x[ ,1], pr.dreduced$x[ ,2], 
+                      preknn1, preknn4, preknn)
+colnames(knnplot) <- c("PC1", "PC2", "K = 1", "K = 4", "K = 8")
+par(mfrow = c(1,3))
+plot(knnplot$PC1, knnplot$PC2,
+     col=ifelse(knnplot$`K = 1`== "M", "coral", "cornflowerblue"), 
+     main = "1-nearest neighbour")
+legend(-500, 650, legend=c("M", "B"),
+       col=c("coral", "cornflowerblue"), pch = c(1,1))
+plot(knnplot$PC1, knnplot$PC2,
+     col=ifelse(knnplot$`K = 4`== "M", "coral", "cornflowerblue"), 
+     main = "4-nearest neighbour")
+legend(-500, 650, legend=c("M", "B"),
+       col=c("coral", "cornflowerblue"), pch = c(1,1))
+plot(knnplot$PC1, knnplot$PC2,
+     col=ifelse(knnplot$`K = 8`== "M", "coral", "cornflowerblue"), 
+     main = "8-nearest neighbour")
+legend(-500, 650, legend=c("M", "B"),
+       col=c("coral", "cornflowerblue"), pch = c(1,1))
+
 
 ```
-```{r stacking, echo=FALSE, warning=FALSE}
+
+
+
+```{r stacking, warning=FALSE, fig.width = 8.5, fig.height = 6}
+knitr::opts_chunk$set(
+  fig.path = "images/")
 require(caret, quietly = TRUE)
 require(randomForest)
 ## compare random foreset and random forest + KNN stacking
 ## tuning grid of rf
 rfGrid <- expand.grid(mtry = (1:5))
 
-## train rf model with caret 
+## train rf model with caret, reduced dataset. 
 set.seed(1234)
 rf <- train(diagnosis ~., data = d_reduced, 
                    method = "rf",
@@ -186,6 +264,12 @@ rf <- train(diagnosis ~., data = d_reduced,
                    trControl = fitControl,
                    tuneGrid = rfGrid)
 print(rf$finalModel)
+prerf <- predict(rf, d_reduced, type = "prob")
+## to obtain the 95% CI
+prerf.raw <- predict(rf, d_reduced, type = "raw")
+confusionMatrix(prerf.raw, d_reduced$diagnosis, positive = "M")
+
+print("Basic rf model with feature selection")
 ##
 
 ## full predictors
@@ -199,21 +283,96 @@ rfo <- train(diagnosis ~., data = d_w,
                    tuneGrid = rfGrid)
 print(rfo$finalModel)
 ## the reduced data is better
+print("Basic rf without feature selection")
 paste("The RandomForest model based on the reduced data is better. ",
       "The OOB error is: ", "3.87%")
-partialPlot(rf$finalModel, d_reduced,perimeter_worst)
+## to obtain the 95% CI
+prerfo.raw <- predict(rfo, d_w, type = "raw")
+confusionMatrix(prerfo.raw, d_reduced$diagnosis, positive = "M")
 
 ##stacking model with the output of KNN as new feature
-d_reduced$KNNfeature <- preknn
+d_stacking <- d_reduced
+d_stacking$KNNfeature <- preknn
 set.seed(1234)
-rf.f <- train(diagnosis ~., data = d_reduced, 
+rf.s <- train(diagnosis ~., data = d_stacking, 
                    method = "rf",
                    #distribution = "bernoulli",
                    #verbose = F,
                    metric = "Accuracy",
                    trControl = fitControl,
                    tuneGrid = rfGrid)
-print(rf.f$finalModel)
+print(rf.s$finalModel)
+print("stacking with raw prediction from KNN")
+## to obtain the 95% CI
+prerfs.raw <- predict(rf.s, d_stacking, type = "raw")
+confusionMatrix(prerfs.raw, d_reduced$diagnosis, positive = "M")
+
+## try with probability of M
+d_sp <- d_reduced
+d_sp$knn <- preknnP$M
+set.seed(1234)
+rf.sp <- train(diagnosis ~., data = d_sp, 
+                   method = "rf",
+                   #distribution = "bernoulli",
+                   #verbose = F,
+                   metric = "Accuracy",
+                   trControl = fitControl,
+                   tuneGrid = rfGrid)
+print(rf.sp$finalModel)
+print("Stacking with probability of M from KNN")
+par(mfrow = c(2,2))
+partialPlot(rf.sp$finalModel, d_sp,perimeter_worst)
+partialPlot(rf.sp$finalModel, d_sp, knn)
+partialPlot(rf.sp$finalModel, d_sp, smoothness_mean)
+partialPlot(rf.sp$finalModel, d_sp, symmetry_mean)
+## to obtain the 95% CI
+prerfsp.raw <- predict(rf.sp, d_sp, type = "raw")
+confusionMatrix(prerfsp.raw, d_reduced$diagnosis, positive = "M")
+
+## try with more stacking
+d_spf <- d_sp
+d_spf$rf <- prerf$M
+set.seed(1234)
+rf.spf <- train(diagnosis ~., data = d_spf, 
+                   method = "rf",
+                   #distribution = "bernoulli",
+                   #verbose = F,
+                   metric = "Accuracy",
+                   trControl = fitControl,
+                   tuneGrid = rfGrid)
+print(rf.spf$finalModel)
+print("Stacking with probability of M from KNN and rf")
+par(mfrow = c(2,3))
+partialPlot(rf.spf$finalModel, d_spf,perimeter_worst)
+partialPlot(rf.sp$finalModel, d_sp, area_worst)
+partialPlot(rf.spf$finalModel, d_spf, knn)
+partialPlot(rf.sp$finalModel, d_spf, rf)
+partialPlot(rf.sp$finalModel, d_spf, smoothness_mean)
+partialPlot(rf.sp$finalModel, d_sp, symmetry_mean)
+## to obtain the 95% CI
+prerfspf.raw <- predict(rf.spf, d_spf, type = "raw")
+confusionMatrix(prerfspf.raw, d_reduced$diagnosis, positive = "M")
+
+## final table 
+knn.results <- data.frame(c("KNN.1", "KNN.final"), 
+                          c("NO", "Yes"), c(9, 8), c(0.9736, 0.9754), 
+                          c("(0.9569, 0.9852)" ,"(0.9591, 0.9865)"))
+colnames(knn.results) <- c("", "Feature Selection", "K", "Accuracy", "95% CI")
+kable(knn.results, caption = "The KNN Models")
+rf.results <- data.frame(c("rf1", "rf2", "rf.stacking1", "rf.stacking2", 
+                           "rf.stacking3"),
+                         c("No", "Yes", "Yes", "Yes", "Yes"), 
+                         c("No", "No", "raw prediction from KNN", 
+                           "probability from KNN", "probability from KNN and rf"), 
+                         c(2, 1, 1, 1, 5), 
+                         c("4.04%", "3.87", "2.81%", "2.64", "0.18%"),
+                         c(1,1,1,1,1),
+                         c("(0.9935, 1)", "(0.9935, 1)","(0.9935, 1)",
+                           "(0.9935, 1)","(0.9935, 1)"))
+colnames(rf.results) <- c("", "Feature Selection", "Stacking", "mtry", "OOB error", 
+                          "Accuracy", "95% CI")
+kable(rf.results, caption = "The Random Forest Model")
+
 
 
 
