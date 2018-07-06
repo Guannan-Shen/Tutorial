@@ -1,6 +1,6 @@
 #### Set Up SSH connection to Google Cloud (GC) Computing Console
 
-####First Time for GC [The reference youtube video](https://www.youtube.com/watch?v=R8C66NwMJLs&t=0s&list=WL&index=2)
+#### First Time for GC [The reference youtube video](https://www.youtube.com/watch?v=R8C66NwMJLs&t=0s&list=WL&index=2)
 
 1. **open** my git bash in Windows, which comes with the Git for Windows
 2. cd to (or mkdir first of ~/.ssh), **cd ~/.ssh/**
@@ -29,7 +29,7 @@
     
 15. In the terminal, check **hisat2 --version** to test if softwares are loaded properly
 
-####Connect the GC each time when you need GC, yes during the process
+#### Connect the GC each time when you need GC, yes during the process
 
 1. **open** git bash (Windows)
 2. **cd ~/.ssh/**
@@ -42,7 +42,7 @@
 9. **gcsfuse --file-mode 777 --dir-mode 777 --implicit-dirs bidump001 /home/username/yourfolder/yourbucketfolder**
 
 
-#####For the local server Yampa
+##### For the local server Yampa
 1. In the git bash, **ssh username@yampa.ucdenver.pvt**
 2. yes
 3. the password, nIcHistaY4
