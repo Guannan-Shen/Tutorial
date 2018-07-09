@@ -40,6 +40,7 @@
 7. The raw data is saved in GC, **Storage**, **Browser**, the *bucket*
 8. Now when you need the data, mount the bucket into your gc console.
 9. **gcsfuse --file-mode 777 --dir-mode 777 --implicit-dirs bidump001 /home/username/yourfolder/yourbucketfolder**
+10. Success if **File system has been successfully mounted**
 
 
 ##### For the local server Yampa
