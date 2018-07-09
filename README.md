@@ -3,4 +3,4 @@
 ## Python
 ## CIDA 
 ## [google cloud](https://github.com/Guannan-Shen/Tutorial/tree/R/Google_Cloud)
-## Linux/Bash
+## [Linux/Bash](https://github.com/Guannan-Shen/Tutorial/tree/R/Linux_Bash)
