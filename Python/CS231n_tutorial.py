@@ -126,5 +126,31 @@ del d['fish']
 print(d.get('fish', 'NA'))
 
 # iterate over keys in a dictionary
+for animal in d:
+    feature = d[animal]
+    print('When you see %s, %s will come into your mind' % (animal, feature))
 
+## easily construct dictionary from list, dict comprehension
+even_num_square = {x:x**2 for x in nums if x % 2 == 0}
+print(even_num_square)
 
+# set
+# set is unordered collection of distinct elements
+new_animals = {'cat', 'dog'}
+## use print to check, boolean
+# in command in set, the idea from the math
+
+print('cat' in new_animals)
+print('chicken' in new_animals)
+
+# the method for set
+new_animals.add('fish')
+print('fish' in new_animals)
+print(new_animals)
+print(len(new_animals))
+new_animals.add('fish')
+print(len(new_animals))
+new_animals.remove('fish')
+print(len(new_animals))
+
+## loop over set has the same syntax with loop over list
