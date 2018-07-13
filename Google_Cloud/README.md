@@ -2,7 +2,7 @@
 
 #### First Time for GC [The reference youtube video](https://www.youtube.com/watch?v=R8C66NwMJLs&t=0s&list=WL&index=2)
 
-1. **open** my git bash in Windows, which comes with the Git for Windows
+1. **open** my git bash in Windows, which comes with the **Git for Windows** (Jump to step 3 if you haven't used any SSH before)
 2. cd to (or mkdir first of ~/.ssh), **cd ~/.ssh/**
 3. **ssh-keygen -t rsa -f ~/.ssh/gc_rsa -C username** (username of the campus). This is to generate public/private Key pair
 4. during the previous step, enter your own **passphrase**
