@@ -12,7 +12,7 @@
 8. Double click an instance. **instance details**, **Edit**
 9. Go to **You have SSH Keys**, **Add item**
 10. In the previous terminal, **vi gc_rsa.pub**
-11. **Copy** the whole ssh-rsa till your username.
+11. **Copy** the whole ssh-rsa till your username. **Ctrl Z** to exit the view. 
 12. In the gc console, **SSH Keys**, **Add item**, **paste** the public key. 
 13. In the terminal, **nano ~/.bashrc**
 14. paste these software (bowtie, samtools, RSEM, hisat2) into the PATH
