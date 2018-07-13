@@ -10,7 +10,7 @@
 6. Make sure there is **gc_rsa.pub**, keep this terminal 
 7. Open the GC console, left drop-down menu, the **compute engine**, **VM Instances**
 8. Double click an instance. **instance details**, **Edit**
-9. Go to **You have SSH Keys**
+9. Go to **You have SSH Keys**, **Add item**
 10. In the previous terminal, **vi gc_rsa.pub**
 11. **Copy** the whole ssh-rsa till your username.
 12. In the gc console, **SSH Keys**, **Add item**, **paste** the public key. 
