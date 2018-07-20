@@ -6,6 +6,7 @@ Created on Fri Jun 29 13:09:37 2018
 """
 
 #From CS231n stanford
+#http://cs231n.github.io/python-numpy-tutorial/
 #%%
 # the quicksort algorithm
 def quicksort(arr):
