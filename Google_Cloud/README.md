@@ -1,10 +1,10 @@
-#### Set Up SSH connection to Google Cloud (GC) Computing Console
-##### First Time
-##### Daily Connection
-##### Local Server Yampa
-##### SFTP via FileZilla
+#### Set Up SSH connection to Google Cloud Platform (GCP) Computing Console
+##### [First Time](#head1)
+##### [Daily Connection](#head2)
+##### [Local Server Yampa](#head3)
+##### [SFTP via FileZilla](#head4)
 
-#### First Time for GC [The reference youtube video](https://www.youtube.com/watch?v=R8C66NwMJLs&t=0s&list=WL&index=2)
+#### <a name="head1"></a>First Time for GCP [The reference youtube video](https://www.youtube.com/watch?v=R8C66NwMJLs&t=0s&list=WL&index=2)
 
 1. **open** my git bash in Windows, which comes with the **Git for Windows** (Jump to step 3 if you haven't used any SSH before)
 2. cd to (or mkdir first of ~/.ssh), **cd ~/.ssh/**
@@ -33,7 +33,7 @@
     
 15. In the terminal, check **hisat2 --version** to test if softwares are loaded properly
 
-#### Connect the GC each time when you need GC, yes during the process
+#### <a name="head2"></a>Connect the GC each time when you need GC, yes during the process
 
 1. **open** git bash (Windows)
 2. **cd ~/.ssh/**
@@ -47,12 +47,12 @@
 10. Success if **File system has been successfully mounted**
 
 
-##### For the local server Yampa
+##### <a name="head3"></a>For the local server Yampa
 1. In the git bash, **ssh username@yampa.ucdenver.pvt**
 2. yes
 3. the password, nIcHistaY4
 
-#### SFTP via FileZilla
+#### <a name="head4"></a>SFTP via FileZilla
 This is for download file from remote server, upload to GCP is easy **just Drag**
 1. Download free version of FileZilla client for Wins 64bit
 2. In the Edit > settings, find SFTP, add key file
