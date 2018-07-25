@@ -56,7 +56,7 @@
 This is for download file from remote server, upload to GCP is easy **just Drag**
 1. Download free version of FileZilla client for Wins 64bit
 2. In the Edit > settings, find SFTP, add key file
-3. choose the key file **gc_rsa** in ~/.ssh folder (~ stands for /home/user), transfer to **gc_rsa.ppk** and save it in the default folder
+3. choose the key file **gc_rsa** in ~/.ssh folder(~stands for /home/user), transfer to **gc_rsa.ppk** and save it in the default folder
 4. In site manager, upper left corner under the file option, new site
 5. Protocol as SFTP, Host is the external IP of GCP instance, Logon Type as Key file, User is your User name, Key file is the **gc_rsa.ppk**, click connect
 6. left panel is local, right panel is remote server 
