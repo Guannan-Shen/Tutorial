@@ -1,0 +1,50 @@
+---
+title: "7659 HW3"
+author: "Guannan Shen"
+date: "October 4, 2018"
+output: 
+  word_document:
+    toc: yes
+    toc_depth: '5'
+  pdf_document:
+    latex_engine: lualatex
+    number_sections: yes
+    toc: yes
+    toc_depth: 5
+  html_document:
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_depth: 5
+    toc_float: yes
+---
+
+
+```{r setup, include=FALSE, cache = FALSE}
+require("knitr")
+opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=TRUE)
+opts_chunk$set(engine = "R")
+knitr::opts_chunk$set(echo = T)
+knitr::opts_chunk$set(message = F)
+knitr::opts_chunk$set(warning = F)
+## setting working directory in asus 
+opts_knit$set(root.dir = "C:/Users/hithr/Documents/Stats/CIDA_OMICs/7659Stats_Genetics/HW3/")
+## setting working directory in ubuntu
+## opts_knit$set(root.dir = "~/Documents/Stats/gitlab/ECCHO_Guannan/Code/")
+                                                 
+## cache = F, if cache = T, will not revaluate code chunk everytime
+## double or more space to insert a line break
+```
+
+
+```{r libs}
+## set up workspace
+library(knitr)
+library(tidyverse)
+options(stringsAsFactors = F)
+options(dplyr.width = Inf)
+getwd()
+```
+
+
+
